@@ -1,13 +1,7 @@
-from re import sub
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import date_format, to_date, split
+from utils import camel_case
 FILE_NAME = 'train.csv'
-
-
-def camel_case(s):
-    """rewrite string in camelCase format"""
-    s = sub(r"(_|-)+", " ", s).title().replace(" ", "")
-    return ''.join([s[0].lower(), s[1:]])
 
 
 def extract_data():
@@ -46,6 +40,7 @@ def transform_data(spark, raw_df):
     customers_columns = ["customerId", "customerName", "segment", "country", "orderDate"]
     df_customers = raw_df.select(*customers_columns)
 
+    # add total <quantity of orders per customer> and <quantity in last 5 days> columns to customers dataframe using sql
     df_customers.createOrReplaceTempView("customers")
 
     query = """
@@ -75,15 +70,17 @@ def transform_data(spark, raw_df):
     df_customers = df_customers.withColumn("customerFirstName",  split(df_customers.customerName, ' ').getItem(0))\
         .withColumn("customerLastName", split(df_customers.customerName, ' ', 2).getItem(1))
 
-    return df_sales, df_customers
+    return {'sales': df_sales,
+            'customers': df_customers}
 
 
-def display_transformed_data(dataframes):
-    for i in dataframes:
-        i.show()
+def data_to_parquet(dataframes):
+    """write transformed dataframes to parquet files"""
+    dataframes['sales'].write.parquet("output/sales.parquet")
+    dataframes['customers'].write.parquet("output/customers.parquet")
 
 
 if __name__ == '__main__':
     spark_and_df = extract_data()
     transformed_data = transform_data(spark_and_df[0], spark_and_df[1])
-    display_transformed_data(transformed_data)
+    data_to_parquet(transformed_data)
