@@ -1,8 +1,11 @@
-# Pre-requisite #
+# Case #
+A retail sales dataset has to be ingested into the company's Datalake. It is expected that some business rules will be added to the final dataset, in addition to some transformations.
+
+## Technical requirement ##
 * raw data transformed from csv file to a pyspark dataframe
 * main dataframe splitted to customers and sales dataframes
 * for customers dataframe <total quantity of orders> and <quantity of orders in last 5 days> per customer are calculated and added as separate columns
-* column nmames rewritten with camelCase format
+* column names rewritten with camelCase format
 * date format is changed
 * final dataframes are written to parquet files
 ## raw data ##
