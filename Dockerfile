@@ -1,8 +1,10 @@
-FROM python:3.8
+FROM datamechanics/spark:3.1-latest
 
-ADD pipeline.py .
+ENV PYSPARK_MAJOR_PYTHON_VERSION=3
+
+ADD scripts/pipeline.py .
+ADD scripts/utils.py .
+
 COPY requirements.txt .
-
-RUN pip install -r requirements.txt
 
 CMD ["python", "./pipeline.py"]
